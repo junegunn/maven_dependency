@@ -1,0 +1,28 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>kr.junegunn</groupId>
+  <artifactId>maven-dependency</artifactId>
+  <version>1</version>
+  <packaging>jar</packaging>
+
+  <dependencies><% _specs.each do |g, a, v| %>
+    <dependency>
+      <groupId><%= g %></groupId>
+      <artifactId><%= a %></artifactId>
+      <version><%= v %></version>
+      <scope>compile</scope>
+    </dependency><% end %>
+  </dependencies>
+  <% unless _repos.empty? %>
+  <repositories><% _repos.each_with_index do |repo, idx| %>
+    <repository>
+      <% unless repo.has_key? :id %><id>repo-<%= idx %></id><% end %>
+      <url><%= repo.fetch :url %></url>
+      <snapshots>
+        <enabled><%= repo.fetch :snapshots, false %></enabled>
+      </snapshots>
+    </repository><% end %>
+  </repositories><% end %>
+</project>

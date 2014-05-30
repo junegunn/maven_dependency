@@ -1,0 +1,56 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'maven_dependency'
+require 'optparse'
+require 'fileutils'
+
+verbose = true
+dir = '.'
+pom = false
+me = File.basename $0
+op = OptionParser.new do |o|
+  o.banner = "usage: #{me} [OPTIONS] <group.id/artifactid[@version] ...>"
+  o.separator ''
+
+  o.on('-q', '--quiet', 'Suppress output') do |v|
+    verbose = !v
+  end
+
+  o.on('-d DIR', '--directory=DIR', 'Directory to put jars (default: .)') do |v|
+    raise "not a directory: #{v}" unless File.directory?(v.to_s)
+    dir = v
+  end
+
+  o.on('', '--pom', 'Print pom file only') do |v|
+    pom = true
+  end
+
+  o.on('-h', '--help', 'Show this message') do
+    puts o
+    exit
+  end
+end
+
+begin
+  op.parse!
+rescue Exception => e
+  puts e
+  puts op
+  exit 1
+end
+
+if ARGV.empty?
+  puts op
+  exit 1
+end
+
+if pom
+  puts MavenDependency.pom(*ARGV)
+else
+  MavenDependency.resolve(*ARGV, :verbose => verbose).each do |dep|
+    puts "Copy #{dep} to #{dir}" if verbose
+    FileUtils.cp dep, dir
+  end
+end
+
